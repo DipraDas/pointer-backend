@@ -1,1 +1,2 @@
 This is some new content for file2
+This is text file 2 - use for Lab5 - task 2.7
