@@ -190,9 +190,20 @@ const verifyLoginOtp = async (payload) => {
     };
 };
 
+const getAllUsers = async () => {
+
+    const users = await User.find()
+        .select("-password")
+        .sort({ createdAt: -1 });
+
+    return users;
+
+};
+
 module.exports = {
     signup,
     verifySignupOtp,
     login,
-    verifyLoginOtp
+    verifyLoginOtp,
+    getAllUsers,
 };
