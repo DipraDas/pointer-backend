@@ -8,17 +8,20 @@ const generateOtp = require("../../utils/generateOtp");
 const sendEmail = require("../../utils/sendEmail");
 
 const signup = async (payload) => {
-
     const { name, email, password } = payload;
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({
+        email: normalizedEmail,
+    });
 
     if (existingUser) {
         throw new Error("Email already exists");
     }
 
     await OTP.deleteMany({
-        email,
+        email: normalizedEmail,
         purpose: "signup",
     });
 
@@ -27,24 +30,38 @@ const signup = async (payload) => {
     const otp = generateOtp();
 
     await OTP.create({
-        email,
+        email: normalizedEmail,
         otp,
         purpose: "signup",
+
         data: {
             name,
             password: hashedPassword,
         },
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+
+        expiresAt: new Date(
+            Date.now() + 5 * 60 * 1000
+        ),
     });
 
-    await sendEmail(
-        email,
-        "Email Verification",
-        `Your verification code is ${otp}`
-    );
+    try {
+        await sendEmail(
+            normalizedEmail,
+            "Pointer Email Verification",
+            `Your verification code is ${otp}`
+        );
+    } catch (error) {
+        await OTP.deleteMany({
+            email: normalizedEmail,
+            purpose: "signup",
+        });
+
+        throw error;
+    }
 
     return {
-        email,
+        email: normalizedEmail,
+        message: "Verification code sent successfully",
     };
 };
 
@@ -95,10 +112,13 @@ const verifySignupOtp = async (payload) => {
 };
 
 const login = async (payload) => {
-
     const { email, password } = payload;
 
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({
+        email: normalizedEmail,
+    }).select("+password");
 
     if (!user) {
         throw new Error("Invalid email or password.");
@@ -121,28 +141,40 @@ const login = async (payload) => {
         throw new Error("Account is inactive.");
     }
 
-    const otp = generateOtp();
-
+    // Remove any previous login OTPs
     await OTP.deleteMany({
-        email,
+        email: normalizedEmail,
         purpose: "login",
     });
 
+    const otp = generateOtp();
+
     await OTP.create({
-        email,
+        email: normalizedEmail,
         otp,
         purpose: "login",
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    await sendEmail(
-        email,
-        "Login Verification",
-        `Your login OTP is ${otp}`
-    );
+    try {
+        await sendEmail(
+            normalizedEmail,
+            "Pointer Login Verification",
+            `Your login verification code is ${otp}`
+        );
+    } catch (error) {
+        // Delete the OTP if the email could not be sent
+        await OTP.deleteMany({
+            email: normalizedEmail,
+            purpose: "login",
+        });
+
+        throw new Error("Unable to send login verification email.");
+    }
 
     return {
-        email,
+        email: normalizedEmail,
+        message: "Login verification code sent successfully.",
     };
 };
 
