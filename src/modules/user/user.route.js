@@ -14,13 +14,10 @@ router.post("/login", userController.login);
 
 router.post("/verify-login-otp", userController.verifyLoginOtp);
 // router.post("/resend-otp", userController.resendOtp);
+router.post("/logout", auth, userController.logout);
 
 // User
-router.get(
-    "/users",
-    auth,
-    authorize("admin"),
-    userController.getAllUsers
-);
+router.get("/users", auth, authorize("admin"), userController.getAllUsers);
+
 
 module.exports = router;

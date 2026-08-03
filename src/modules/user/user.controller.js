@@ -1,3 +1,4 @@
+const BlacklistedToken = require("../blacklistedToken/blacklistedToken.model");
 const userService = require("./user.service");
 
 const signup = async (req, res) => {
@@ -115,10 +116,26 @@ const getAllUsers = async (req, res) => {
 
 };
 
+const logout = async (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    await BlacklistedToken.create({
+        token,
+        expiresAt: new Date(req.user.exp * 1000),
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Logout successful",
+    });
+};
+
+
 module.exports = {
     signup,
     verifySignupOtp,
     login,
     verifyLoginOtp,
     getAllUsers,
+    logout,
 };
