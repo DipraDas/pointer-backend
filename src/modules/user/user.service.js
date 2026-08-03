@@ -7,35 +7,53 @@ const OTP = require("../otp/otp.model");
 const generateOtp = require("../../utils/generateOtp");
 const sendEmail = require("../../utils/sendEmail");
 
-const signup = async (payload) => {
+const signup = async payload => {
     const { name, email, password } = payload;
 
-    const normalizedEmail = email.trim().toLowerCase();
+    if (!name || !name.trim()) {
+        throw new Error("Name is required.");
+    }
 
+    if (!email || !email.trim()) {
+        throw new Error("Email is required.");
+    }
+
+    if (!password) {
+        throw new Error("Password is required.");
+    }
+
+    const normalizedEmail =
+        email.trim().toLowerCase();
+
+    // Check whether the email already exists
     const existingUser = await User.findOne({
         email: normalizedEmail,
     });
 
     if (existingUser) {
-        throw new Error("Email already exists");
+        throw new Error("Email already exists.");
     }
 
+    // Remove previous signup OTP
     await OTP.deleteMany({
         email: normalizedEmail,
         purpose: "signup",
     });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+        password,
+        10
+    );
 
     const otp = generateOtp();
 
     await OTP.create({
         email: normalizedEmail,
-        otp,
+        otp: String(otp),
         purpose: "signup",
 
         data: {
-            name,
+            name: name.trim(),
             password: hashedPassword,
         },
 
@@ -48,9 +66,11 @@ const signup = async (payload) => {
         await sendEmail(
             normalizedEmail,
             "Pointer Email Verification",
-            `Your verification code is ${otp}`
+            `Your verification code is ${otp}`,
+            otp
         );
     } catch (error) {
+        // Remove OTP if sending the email fails
         await OTP.deleteMany({
             email: normalizedEmail,
             purpose: "signup",
@@ -61,7 +81,8 @@ const signup = async (payload) => {
 
     return {
         email: normalizedEmail,
-        message: "Verification code sent successfully",
+        message:
+            "Verification code sent successfully.",
     };
 };
 
@@ -111,10 +132,16 @@ const verifySignupOtp = async (payload) => {
     };
 };
 
-const login = async (payload) => {
+const login = async payload => {
     const { email, password } = payload;
 
-    const normalizedEmail = email.trim().toLowerCase();
+    if (!email || !email.trim()) {
+        throw new Error("Email is required.");
+    }
+
+    const normalizedEmail =
+        email.trim().toLowerCase();
+
 
     const user = await User.findOne({
         email: normalizedEmail,
@@ -159,8 +186,9 @@ const login = async (payload) => {
     try {
         await sendEmail(
             normalizedEmail,
-            "Pointer Login Verification",
-            `Your login verification code is ${otp}`
+            "Pointer Email Verification",
+            `Your verification code is ${otp}`,
+            otp
         );
     } catch (error) {
         // Delete the OTP if the email could not be sent
