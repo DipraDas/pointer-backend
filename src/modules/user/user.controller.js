@@ -130,6 +130,39 @@ const logout = async (req, res) => {
     });
 };
 
+const changePassword = async (req, res) => {
+  try {
+
+    const {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    } = req.body;
+
+
+    const result = await userService.changePasswordService(
+      req.user.id,
+      oldPassword,
+      newPassword,
+      confirmPassword
+    );
+
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
     signup,
@@ -138,4 +171,5 @@ module.exports = {
     verifyLoginOtp,
     getAllUsers,
     logout,
+    changePassword
 };

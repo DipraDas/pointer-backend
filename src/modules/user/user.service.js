@@ -260,10 +260,87 @@ const getAllUsers = async () => {
 
 };
 
+const changePasswordService = async (
+    userId,
+    oldPassword,
+    newPassword,
+    confirmPassword
+) => {
+
+    // Check required fields
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        throw new Error("All fields are required.");
+    }
+
+
+    // Check new password confirmation
+    if (newPassword !== confirmPassword) {
+        throw new Error(
+            "New password and confirm password do not match."
+        );
+    }
+
+
+    // Check password length
+    if (newPassword.length < 6) {
+        throw new Error(
+            "Password must be at least 6 characters."
+        );
+    }
+
+    // Find user
+    const user = await User.findById(userId).select("+password");
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+
+    // Check old password
+    const isPasswordCorrect = await bcrypt.compare(
+        oldPassword,
+        user.password
+    );
+
+    if (!isPasswordCorrect) {
+        throw new Error("Old password is incorrect.");
+    }
+
+    // New password cannot be the same as old password
+    const isSamePassword = await bcrypt.compare(
+        newPassword,
+        user.password
+    );
+
+    if (isSamePassword) {
+        throw new Error(
+            "New password cannot be the same as old password."
+        );
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(
+        newPassword,
+        10
+    );
+
+
+    // Update password
+    user.password = hashedPassword;
+
+    await user.save();
+
+
+    return {
+        message: "Password changed successfully.",
+    };
+};
+
 module.exports = {
     signup,
     verifySignupOtp,
     login,
     verifyLoginOtp,
     getAllUsers,
+    changePasswordService
 };
