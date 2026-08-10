@@ -251,13 +251,16 @@ const verifyLoginOtp = async (payload) => {
 };
 
 const getAllUsers = async () => {
+    console.log("Getting users from DB...");
 
     const users = await User.find()
         .select("-password")
         .sort({ createdAt: -1 });
 
-    return users;
+    console.log("Users found:", users);
+    console.log("User count:", users.length);
 
+    return users;
 };
 
 const changePasswordService = async (

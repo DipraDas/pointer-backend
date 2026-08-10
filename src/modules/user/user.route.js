@@ -17,7 +17,7 @@ router.post("/verify-login-otp", userController.verifyLoginOtp);
 router.post("/logout", auth, userController.logout);
 router.post("/change-password", auth, userController.changePassword);
 // User
-router.get("/users", auth, authorize("admin"), userController.getAllUsers);
+router.get("/getAllParents", auth, authorize("admin"), userController.getAllUsers);
 
 
 module.exports = router;
