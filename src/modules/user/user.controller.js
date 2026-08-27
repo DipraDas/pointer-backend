@@ -131,37 +131,73 @@ const logout = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-  try {
+    try {
 
-    const {
-      oldPassword,
-      newPassword,
-      confirmPassword,
-    } = req.body;
-
-
-    const result = await userService.changePasswordService(
-      req.user.id,
-      oldPassword,
-      newPassword,
-      confirmPassword
-    );
+        const {
+            oldPassword,
+            newPassword,
+            confirmPassword,
+        } = req.body;
 
 
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-    });
+        const result = await userService.changePasswordService(
+            req.user.id,
+            oldPassword,
+            newPassword,
+            confirmPassword
+        );
 
-  } catch (error) {
 
-    console.error(error);
+        return res.status(200).json({
+            success: true,
+            message: result.message,
+        });
 
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  }
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+const addDeviceToUser = async (req, res) => {
+    try {
+        const {
+            email,
+            serialNumber,
+        } = req.body;
+
+        const result =
+            await userService.addDeviceToUser(
+                email,
+                serialNumber
+            );
+
+        console.log("================================");
+        console.log("DEVICE ASSIGNED TO USER");
+        console.log("User:", email);
+        console.log("Device:", serialNumber);
+        console.log("================================");
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "Device added to user successfully.",
+            data: result,
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };
 
 module.exports = {
@@ -171,5 +207,6 @@ module.exports = {
     verifyLoginOtp,
     getAllUsers,
     logout,
-    changePassword
+    changePassword,
+    addDeviceToUser,
 };

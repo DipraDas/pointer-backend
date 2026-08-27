@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const { generateAccessToken } = require("../../utils/jwt");
+const Device = require("../device/device.model");
 
 const User = require("./user.model");
 const OTP = require("../otp/otp.model");
@@ -339,11 +340,72 @@ const changePasswordService = async (
     };
 };
 
+const addDeviceToUser = async (
+    email,
+    serialNumber
+) => {
+    if (!email) {
+        throw new Error("User email is required.");
+    }
+
+    if (!serialNumber) {
+        throw new Error("Device serial number is required.");
+    }
+
+    const normalizedEmail =
+        email.trim().toLowerCase();
+
+    // FIND USER
+    const user = await User.findOne({
+        email: normalizedEmail,
+    });
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    // FIND DEVICE
+    const device = await Device.findOne({
+        serialNumber: serialNumber,
+    });
+
+    if (!device) {
+        throw new Error("Device not found.");
+    }
+
+    // CHECK IF ALREADY ADDED
+    const alreadyAdded = user.devices.some(
+        deviceId =>
+            deviceId.toString() ===
+            device._id.toString()
+    );
+
+    if (alreadyAdded) {
+        throw new Error(
+            "Device already added to this user."
+        );
+    }
+
+    // ADD DEVICE
+    user.devices.push(device._id);
+
+    await user.save();
+
+    const updatedUser = await User.findById(
+        user._id
+    )
+        .select("-password")
+        .populate("devices");
+
+    return updatedUser;
+};
+
 module.exports = {
     signup,
     verifySignupOtp,
     login,
     verifyLoginOtp,
     getAllUsers,
-    changePasswordService
+    changePasswordService,
+    addDeviceToUser,
 };

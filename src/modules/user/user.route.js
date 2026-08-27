@@ -18,6 +18,7 @@ router.post("/logout", auth, userController.logout);
 router.post("/change-password", auth, userController.changePassword);
 // User
 router.get("/getAllParents", auth, authorize("admin"), userController.getAllUsers);
+router.post("/add-device",auth,userController.addDeviceToUser);
 
 
 module.exports = router;
