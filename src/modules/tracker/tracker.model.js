@@ -4,7 +4,7 @@ const trackerSchema = new mongoose.Schema(
     {
         deviceName: {
             type: String,
-            required: true,
+            required: false,
         },
 
         serialNumber: {

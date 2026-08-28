@@ -7,11 +7,26 @@ const saveLocation = async (req, res) => {
             serialNumber,
             latitude,
             longitude,
-            gpsDate,
-            gpsTime,
             emergency,
             googleMapsLink,
         } = req.body;
+
+        const now = new Date();
+
+        const sydneyDate = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Australia/Sydney",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        }).format(now);
+
+        const sydneyTime = new Intl.DateTimeFormat("en-AU", {
+            timeZone: "Australia/Sydney",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(now);
 
         if (
             !deviceName ||
@@ -26,17 +41,17 @@ const saveLocation = async (req, res) => {
         }
 
         const data = await trackerService.saveTrackerData({
-            deviceName,
             serialNumber,
             latitude,
             longitude,
-            gpsDate,
-            gpsTime,
+            gpsDate: sydneyDate,
+            gpsTime: sydneyTime,
             emergency: emergency || false,
             googleMapsLink,
         });
 
         console.log("TRACKER DATA SAVED");
+        console.log("------------------");
 
         return res.status(201).json({
             success: true,
