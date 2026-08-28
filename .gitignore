@@ -13,3 +13,5 @@ build/
 .vscode/
 
 .DS_Store
+
+config/firebase-service-account.json

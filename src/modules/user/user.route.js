@@ -18,6 +18,10 @@ router.post("/logout", auth, userController.logout);
 router.post("/change-password", auth, userController.changePassword);
 // User
 router.get("/users", auth, authorize("admin"), userController.getAllUsers);
-
+router.post(
+  "/device-token",
+  auth,
+  userController.saveDeviceToken
+);
 
 module.exports = router;

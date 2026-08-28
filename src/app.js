@@ -20,6 +20,8 @@ app.get("/", (req, res) => {
 });
 
 const userRoutes = require("./modules/user/user.route");
+const notificationRoutes = require("./modules/notification/notification.routes");
 
 app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 module.exports = app;

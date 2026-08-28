@@ -38,6 +38,19 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        fcmTokens: [
+            {
+                token: {
+                    type: String,
+                    required: true,
+                },
+                platform: {
+                    type: String,
+                    enum: ["android", "ios"],
+                    default: "android",
+                },
+            },
+        ],
 
     },
     {
