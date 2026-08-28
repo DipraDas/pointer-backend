@@ -338,6 +338,7 @@ const sendEmail = async (
             "Email sent successfully:",
             info.messageId
         );
+        console.log("OTP IS: " , otp);
 
         return info;
     } catch (error) {
