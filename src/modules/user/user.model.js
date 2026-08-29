@@ -51,7 +51,12 @@ const userSchema = new mongoose.Schema(
                 },
             },
         ],
-
+        devices: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Device",
+            },
+        ],
     },
     {
         timestamps: true,
