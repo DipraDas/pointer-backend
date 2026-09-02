@@ -2,13 +2,9 @@ const mongoose = require("mongoose");
 
 const trackerSchema = new mongoose.Schema(
     {
-        deviceName: {
-            type: String,
-            required: false,
-        },
-
-        serialNumber: {
-            type: String,
+        device: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Device",
             required: true,
         },
 
@@ -22,21 +18,19 @@ const trackerSchema = new mongoose.Schema(
             required: true,
         },
 
-        gpsDate: {
-            type: String,
+        speed: {
+            type: Number,
+            default: 0,
         },
 
-        gpsTime: {
-            type: String,
+        battery: {
+            type: Number,
+            default: null,
         },
 
-        emergency: {
-            type: Boolean,
-            default: false,
-        },
-
-        googleMapsLink: {
+        status: {
             type: String,
+            default: "active",
         },
     },
     {
@@ -44,6 +38,8 @@ const trackerSchema = new mongoose.Schema(
     }
 );
 
-const Tracker = mongoose.model("Tracker", trackerSchema);
-
-module.exports = Tracker;
+module.exports =
+    mongoose.model(
+        "Tracker",
+        trackerSchema
+    );

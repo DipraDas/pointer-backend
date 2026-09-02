@@ -1,74 +1,134 @@
-const trackerService = require("./tracker.service");
+const Tracker = require("./tracker.model");
 
+
+// SAVE LOCATION
 const saveLocation = async (req, res) => {
     try {
+
         const {
-            deviceName,
-            serialNumber,
+            deviceId,
             latitude,
             longitude,
-            emergency,
-            googleMapsLink,
         } = req.body;
 
-        const now = new Date();
-
-        const sydneyDate = new Intl.DateTimeFormat("en-CA", {
-            timeZone: "Australia/Sydney",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        }).format(now);
-
-        const sydneyTime = new Intl.DateTimeFormat("en-AU", {
-            timeZone: "Australia/Sydney",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-        }).format(now);
 
         if (
-            !deviceName ||
-            !serialNumber ||
+            !deviceId ||
             latitude === undefined ||
             longitude === undefined
         ) {
             return res.status(400).json({
                 success: false,
-                message: "Required tracker data is missing",
+                message:
+                    "Device ID, latitude and longitude are required",
             });
         }
 
-        const data = await trackerService.saveTrackerData({
-            serialNumber,
+
+        const location = await Tracker.create({
+            device: deviceId,
             latitude,
             longitude,
-            gpsDate: sydneyDate,
-            gpsTime: sydneyTime,
-            emergency: emergency || false,
-            googleMapsLink,
         });
 
-        console.log("TRACKER DATA SAVED");
-        console.log("------------------");
 
         return res.status(201).json({
             success: true,
-            message: "Tracker data saved successfully",
-            data,
+            message: "Location saved successfully",
+            data: location,
         });
+
+
     } catch (error) {
-        console.log("Tracker save error:", error);
+
+        console.log(
+            "SAVE LOCATION ERROR:",
+            error
+        );
+
 
         return res.status(500).json({
             success: false,
-            message: "Failed to save tracker data",
+            message: "Failed to save location",
             error: error.message,
         });
     }
 };
 
+
+// GET LATEST DEVICE DATA
+const getLastDeviceData = async (req, res) => {
+
+    try {
+
+        const { deviceId } = req.params;
+
+
+        if (!deviceId) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Device serial number is required",
+            });
+
+        }
+
+
+        // Find latest record for this serial number
+        const latestData = await Tracker.findOne({
+            serialNumber: deviceId,
+        })
+        .sort({
+            createdAt: -1,
+        });
+
+
+        if (!latestData) {
+
+            return res.status(404).json({
+                success: false,
+                message: "No tracking data found for this device",
+            });
+
+        }
+        return res.status(200).json({
+
+            success: true,
+
+            message:
+                "Latest device data fetched successfully",
+
+            // RETURN EVERYTHING FROM MONGODB
+            data: latestData,
+
+        });
+
+
+    } catch (error) {
+
+        console.log(
+            "GET LAST DEVICE DATA ERROR:",
+            error
+        );
+
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                "Failed to get latest device data",
+
+            error: error.message,
+
+        });
+
+    }
+
+};
+
+
 module.exports = {
     saveLocation,
+    getLastDeviceData,
 };

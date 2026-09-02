@@ -22,7 +22,14 @@ router.post(
   "/device-token",
   auth,
   userController.saveDeviceToken
-);router.post("/add-device",auth,userController.addDeviceToUser);
+);
+router.post("/add-device",auth,userController.addDeviceToUser);
+router.get(
+    "/me",
+    auth,
+    userController.getCurrentUser
+);
+    
 
 
 module.exports = router;

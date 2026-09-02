@@ -251,6 +251,76 @@ const addDeviceToUser = async (req, res) => {
     }
 };
 
+const getCurrentUser = async (req, res) => {
+    try {
+
+        console.log("================================");
+        console.log("GET CURRENT USER");
+        console.log("REQ USER:", req.user);
+
+
+        // auth middleware should put user information in req.user
+        const userId =
+            req.user?._id ||
+            req.user?.id ||
+            req.user?.userId;
+
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized user",
+            });
+        }
+
+
+        // Find user and populate connected devices
+        const user = await User.findById(userId)
+            .select("-password")
+            .populate("devices");
+
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+
+        console.log("User:", user.email);
+
+        console.log(
+            "Devices:",
+            user.devices
+        );
+
+        console.log("================================");
+
+
+        return res.status(200).json({
+            success: true,
+            message: "User fetched successfully",
+            data: user,
+        });
+
+
+    } catch (error) {
+
+        console.log(
+            "GET CURRENT USER ERROR:",
+            error
+        );
+
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch user",
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     signup,
     verifySignupOtp,
@@ -261,4 +331,5 @@ module.exports = {
     changePassword,
     saveDeviceToken,
     addDeviceToUser,
+    getCurrentUser
 };
