@@ -85,6 +85,53 @@ const sendNotificationToUser = async (req, res) => {
   }
 };
 
+const triggerNotification = async (req, res) => {
+  try {
+    const {
+      userId,
+      sendNotification,
+      title,
+      body,
+    } = req.body;
+
+    if (!sendNotification) {
+      return res.status(200).json({
+        success: true,
+        message: "Notification flag is false. Nothing sent.",
+      });
+    }
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "userId is required",
+      });
+    }
+
+    const result =
+      await notificationService.sendNotificationToUser({
+        userId,
+        title,
+        body,
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification sent successfully",
+      data: result,
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   sendNotificationToUser,
+  triggerNotification
 };
