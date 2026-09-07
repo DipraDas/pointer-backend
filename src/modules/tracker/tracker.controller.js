@@ -1,4 +1,6 @@
 const Tracker = require("./tracker.model");
+const Device = require("../device/device.model");
+const User = require("../user/user.model");
 
 
 // SAVE LOCATION
