@@ -8,6 +8,8 @@ const OTP = require("../otp/otp.model");
 const generateOtp = require("../../utils/generateOtp");
 const sendEmail = require("../../utils/sendEmail");
 
+const VALID_PLACE_TYPES = ["home", "office", "school", "custom"];
+
 const signup = async payload => {
     const { name, email, password } = payload;
 
@@ -400,6 +402,93 @@ const addDeviceToUser = async (
     return updatedUser;
 };
 
+// Creates a new saved place, or updates an existing one if `id` is passed.
+// For the fixed types (home/office/school) any existing place of that type
+// is replaced, so a user can only ever have one Home, one Office, one School.
+// "custom" places are never deduped by type - each gets its own entry.
+const addOrUpdateLocation = async (userId, payload) => {
+
+    const { id, type, label, address, lat, lon } = payload;
+
+    if (!type || !VALID_PLACE_TYPES.includes(type)) {
+        throw new Error(
+            `Type must be one of: ${VALID_PLACE_TYPES.join(", ")}.`
+        );
+    }
+
+    if (!label || !label.trim()) {
+        throw new Error("Label is required.");
+    }
+
+    if (!address || !address.trim()) {
+        throw new Error("Address is required.");
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    const placeData = {
+        type,
+        label: label.trim(),
+        address: address.trim(),
+        lat: lat !== undefined ? lat : undefined,
+        lon: lon !== undefined ? lon : undefined,
+    };
+
+    if (id) {
+        // Update an existing place by its subdocument id
+        const existingPlace = user.savedPlaces.id(id);
+
+        if (!existingPlace) {
+            throw new Error("Saved place not found.");
+        }
+
+        existingPlace.set(placeData);
+    } else if (type !== "custom") {
+        // Enforce a single Home / Office / School entry: replace any
+        // existing place of this type instead of allowing duplicates.
+        user.savedPlaces = user.savedPlaces.filter(
+            place => place.type !== type
+        );
+
+        user.savedPlaces.push(placeData);
+    } else {
+        user.savedPlaces.push(placeData);
+    }
+
+    await user.save();
+
+    const savedPlace = id
+        ? user.savedPlaces.id(id)
+        : user.savedPlaces[user.savedPlaces.length - 1];
+
+    return savedPlace;
+};
+
+const removeLocation = async (userId, placeId) => {
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    const existingPlace = user.savedPlaces.id(placeId);
+
+    if (!existingPlace) {
+        throw new Error("Saved place not found.");
+    }
+
+    existingPlace.deleteOne();
+
+    await user.save();
+
+    return { id: placeId };
+};
+
 module.exports = {
     signup,
     verifySignupOtp,
@@ -408,4 +497,6 @@ module.exports = {
     getAllUsers,
     changePasswordService,
     addDeviceToUser,
+    addOrUpdateLocation,
+    removeLocation,
 };

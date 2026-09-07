@@ -1,5 +1,37 @@
 const mongoose = require("mongoose");
 
+const savedPlaceSchema = new mongoose.Schema(
+    {
+        type: {
+            type: String,
+            enum: ["home", "office", "school", "custom"],
+            required: true,
+        },
+
+        label: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        address: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
+        lat: {
+            type: Number,
+        },
+
+        lon: {
+            type: Number,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
 
 const userSchema = new mongoose.Schema(
     {
@@ -57,14 +89,14 @@ const userSchema = new mongoose.Schema(
                 ref: "Device",
             },
         ],
+
+        savedPlaces: [savedPlaceSchema],
     },
     {
         timestamps: true,
     }
 );
 
-
 const User = mongoose.model("User", userSchema);
-
 
 module.exports = User;

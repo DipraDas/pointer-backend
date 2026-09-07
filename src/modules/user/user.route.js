@@ -19,5 +19,19 @@ router.get("/getAllParents", auth, authorize("admin"), userController.getAllUser
 router.post("/device-token", auth, userController.saveDeviceToken);
 router.post("/add-device",auth,userController.addDeviceToUser);
 
+router.post(
+    "/device-token",
+    auth,
+    userController.saveDeviceToken
+);
+router.post("/add-device", auth, userController.addDeviceToUser);
+router.post("/add-location", auth, userController.addLocationsToUser);
+router.delete("/location/:id", auth, userController.removeLocationFromUser);
+
+router.get(
+    "/me",
+    auth,
+    userController.getCurrentUser
+);
 
 module.exports = router;
