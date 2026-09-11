@@ -8,6 +8,12 @@ const trackerSchema = new mongoose.Schema(
             required: true,
         },
 
+        serialNumber: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
         latitude: {
             type: Number,
             required: true,
@@ -16,6 +22,21 @@ const trackerSchema = new mongoose.Schema(
         longitude: {
             type: Number,
             required: true,
+        },
+
+        gpsDate: {
+            type: String,
+            default: "",
+        },
+
+        gpsTime: {
+            type: String,
+            default: "",
+        },
+
+        emergency: {
+            type: Boolean,
+            default: false,
         },
 
         speed: {
@@ -38,8 +59,7 @@ const trackerSchema = new mongoose.Schema(
     }
 );
 
-module.exports =
-    mongoose.model(
-        "Tracker",
-        trackerSchema
-    );
+module.exports = mongoose.model(
+    "Tracker",
+    trackerSchema
+);

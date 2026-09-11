@@ -131,25 +131,17 @@ const saveLocation = async (req, res) => {
         const location =
             await Tracker.create({
 
-                // Mongo device reference
-                device:
-                    device._id,
+                device: device._id,
 
-                // IMPORTANT
-                // save serial number too
-                serialNumber:
-                    device.serialNumber,
+                serialNumber: device.serialNumber,
 
                 latitude,
-
                 longitude,
 
                 gpsDate,
-
                 gpsTime,
 
-                emergency:
-                    isEmergency,
+                emergency: isEmergency,
 
             });
 
@@ -178,10 +170,9 @@ const saveLocation = async (req, res) => {
                             "Emergency Alert",
 
                         body:
-                            `${
-                                deviceName ||
-                                device.deviceName ||
-                                "Your device"
+                            `${deviceName ||
+                            device.deviceName ||
+                            "Your device"
                             } has triggered an emergency alert.`,
 
                         data: {
@@ -212,7 +203,7 @@ const saveLocation = async (req, res) => {
 
 
             } catch (
-                notificationError
+            notificationError
             ) {
 
                 // Do not fail location saving
@@ -315,12 +306,12 @@ const getLastDeviceData = async (
                     deviceId.trim(),
 
             })
-            .sort({
+                .sort({
 
-                createdAt:
-                    -1,
+                    createdAt:
+                        -1,
 
-            });
+                });
 
 
         if (!latestData) {
