@@ -366,12 +366,45 @@ const getLastDeviceData = async (
 
 };
 
+const getLastFiveEmergencies = async (req, res) => {
+    try {
 
+        const emergencies = await Tracker.find({
+            emergency: true,
+        })
+            .sort({
+                createdAt: -1,
+            })
+            .limit(5);
+
+        return res.status(200).json({
+            success: true,
+            message: "Last 5 emergency records fetched successfully",
+            count: emergencies.length,
+            data: emergencies,
+        });
+
+    } catch (error) {
+
+        console.log(
+            "GET EMERGENCIES ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get emergency records",
+            error: error.message,
+        });
+
+    }
+};
 
 module.exports = {
 
     saveLocation,
 
     getLastDeviceData,
+    getLastFiveEmergencies,
 
 };

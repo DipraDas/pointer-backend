@@ -29,4 +29,8 @@ router.get(
     trackerController.getLastDeviceData
 );
 
+router.get(
+  "/emergencies/latest",
+  trackerController.getLastFiveEmergencies
+);
 module.exports = router;
