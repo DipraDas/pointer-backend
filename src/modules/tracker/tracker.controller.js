@@ -156,67 +156,28 @@ const saveLocation = async (req, res) => {
         // SEND EMERGENCY NOTIFICATION
         // ======================================
 
-        if (isEmergency) {
+      if (isEmergency) {
+    try {
 
-            try {
+        await notificationService.sendNotificationToUser({
+            userId: "6a700a38e187f7e9181e301f",
+            title: "EMERGENCY",
+            body: "DEVICE ID 7CC2DD6DE378",
+        });
 
-                await notificationService
-                    .sendNotificationToUser({
+        console.log(
+            "EMERGENCY NOTIFICATION SENT"
+        );
 
-                        userId:
-                            user._id,
+    } catch (notificationError) {
 
-                        title:
-                            "Emergency Alert",
-
-                        body:
-                            `${deviceName ||
-                            device.deviceName ||
-                            "Your device"
-                            } has triggered an emergency alert.`,
-
-                        data: {
-
-                            type:
-                                "emergency",
-
-                            deviceId:
-                                device._id.toString(),
-
-                            serialNumber:
-                                device.serialNumber,
-
-                            latitude:
-                                latitude.toString(),
-
-                            longitude:
-                                longitude.toString(),
-
-                        },
-
-                    });
-
-
-                console.log(
-                    "EMERGENCY NOTIFICATION SENT"
-                );
-
-
-            } catch (
+        console.log(
+            "NOTIFICATION ERROR:",
             notificationError
-            ) {
+        );
 
-                // Do not fail location saving
-                // just because notification failed
-
-                console.log(
-                    "NOTIFICATION ERROR:",
-                    notificationError
-                );
-
-            }
-
-        }
+    }
+}
 
 
         // ======================================
